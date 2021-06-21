@@ -43,6 +43,7 @@ int doneInst = 0;
 int RF[5] = {0, 2, 4, 6, 8};
 int RAT[5] = {-1, -1, -1, -1, -1};
 int cycOfADD = 1, cycOfMUL = 1, cycOfDIV = 1, CYCLE = 1;
+bool needToPrint = false;
 queue<Instruction> Instructions;
 vector<RS> RS1(3, RS());
 vector<RS> RS2(2, RS());
@@ -101,6 +102,7 @@ void issue()
                         RS1[i].busy = true; //set to busy
                         RAT[inputRS.rd - 1] = i + 1; //update RAT
                         Instructions.pop();
+                        needToPrint = true;
 
                         break;
                     }
@@ -146,6 +148,7 @@ void issue()
                         RS2[i].busy = true; //set to busy
                         RAT[inputRS.rd - 1] = i + 4; //update RAT
                         Instructions.pop();
+                        needToPrint = true;
 
                         break;
                     }
@@ -163,6 +166,8 @@ void execute()
         {
             if (RS1[i].rs2 == false && RS1[i].rs3 == false && RS1[i].cycEXE <= CYCLE && RS1[i].busy == true) //check for execute
             {
+                needToPrint = true;
+
                 rs1Buffer.cycWB = CYCLE + cycOfADD; //calculate cycle of write back
 
                 rs1Buffer.operation = RS1[i].operation; //update buufer
@@ -183,6 +188,8 @@ void execute()
         {
             if (RS2[i].rs2 == false && RS2[i].rs3 == false && RS2[i].cycEXE <= CYCLE && RS2[i].busy == true) //check for execute
             {
+                needToPrint = true;
+
                 if (RS2[i].operation == 4)
                 {
                     rs2Buffer.cycWB = CYCLE + cycOfMUL; //calculate MUL cycle of write back
@@ -210,6 +217,7 @@ void writeBack()
     int result;
     if (rs1Buffer.empty == false && rs1Buffer.cycWB <= CYCLE) //check for write back
     {
+        needToPrint = true;
         if (rs1Buffer.operation == 3)
         {
             result = rs1Buffer.r2 - rs1Buffer.r3; //calculate result for SUB
@@ -279,6 +287,8 @@ void writeBack()
 
     if (rs2Buffer.empty == false && rs2Buffer.cycWB <= CYCLE) //check for write back
     {
+        needToPrint = true;
+
         if (rs2Buffer.operation == 4) 
         {
             result = rs2Buffer.r2 * rs2Buffer.r3; //calculate result for MUL
@@ -348,168 +358,178 @@ void writeBack()
 
 void print()
 {
-    cout << endl << "Cycle: " << CYCLE << endl << endl;
-
-    cout << "   ---RF---" << endl;
-    for (size_t i = 0; i < 5; i++)
+    if (needToPrint)
     {
-        cout << "F" << i + 1 << " |" << setw(5) << RF[i] << " |" << endl;
-    }
-    cout << "   --------" << endl << endl;
+        cout << endl
+             << "Cycle: " << CYCLE << endl
+             << endl;
 
-    cout << "   ---RAT---" << endl;
-    for (size_t i = 0; i < 5; i++)
-    {
-        if (RAT[i] == -1)
+        cout << "   ---RF---" << endl;
+        for (size_t i = 0; i < 5; i++)
         {
-            cout << "F" << i + 1 << " |" << setw(6) << " " << " |" << endl;
+            cout << "F" << i + 1 << " |" << setw(5) << RF[i] << " |" << endl;
         }
-        else
-        {
-            cout << "F" << i + 1 << " |" << "   RS" << RAT[i] << " |" << endl;
-        }
-    }
-    cout << "   ---------" << endl << endl;
+        cout << "   --------" << endl
+             << endl;
 
-    cout << "    --------RS---------" << endl;
-    for (size_t i = 0; i < 3; i++)
-    {
-        cout << "RS" << i + 1 << " |";
-        if (RS1.size() == 0)
+        cout << "   ---RAT---" << endl;
+        for (size_t i = 0; i < 5; i++)
         {
-            cout << "     |     |     |" << endl;
+            if (RAT[i] == -1)
+            {
+                cout << "F" << i + 1 << " |" << setw(6) << " "
+                     << " |" << endl;
+            }
+            else
+            {
+                cout << "F" << i + 1 << " |"
+                     << "   RS" << RAT[i] << " |" << endl;
+            }
         }
-        else
+        cout << "   ---------" << endl
+             << endl;
+
+        cout << "    --------RS---------" << endl;
+        for (size_t i = 0; i < 3; i++)
         {
-            if (RS1[i].busy == false)
+            cout << "RS" << i + 1 << " |";
+            if (RS1.size() == 0)
             {
                 cout << "     |     |     |" << endl;
             }
             else
             {
-                if (RS1[i].operation == 3)
+                if (RS1[i].busy == false)
                 {
-                    cout << setw(4) << "-";
+                    cout << "     |     |     |" << endl;
                 }
                 else
                 {
-                    cout << setw(4) << "+";
-                }
+                    if (RS1[i].operation == 3)
+                    {
+                        cout << setw(4) << "-";
+                    }
+                    else
+                    {
+                        cout << setw(4) << "+";
+                    }
 
-                cout << " |";
+                    cout << " |";
 
-                if (RS1[i].rs2 == true)
-                {
-                    cout << " RS" << RS1[i].r2;
-                }
-                else
-                {
-                    cout << setw(4) << RS1[i].r2;
-                }
+                    if (RS1[i].rs2 == true)
+                    {
+                        cout << " RS" << RS1[i].r2;
+                    }
+                    else
+                    {
+                        cout << setw(4) << RS1[i].r2;
+                    }
 
-                cout << " |";
+                    cout << " |";
 
-                if (RS1[i].rs3 == true)
-                {
-                    cout << " RS" << RS1[i].r3;
-                }
-                else
-                {
-                    cout << setw(4) << RS1[i].r3;
-                }
+                    if (RS1[i].rs3 == true)
+                    {
+                        cout << " RS" << RS1[i].r3;
+                    }
+                    else
+                    {
+                        cout << setw(4) << RS1[i].r3;
+                    }
 
-                cout << " |" << endl;
+                    cout << " |" << endl;
+                }
             }
         }
-    }
-    cout << "    -------------------" << endl;
+        cout << "    -------------------" << endl;
 
-    cout << "BUFFER: ";
-    if (rs1Buffer.empty == true)
-    {
-        cout << "empty" << endl;
-    }
-    else
-    {
-        if (rs1Buffer.operation == 3)
+        cout << "BUFFER: ";
+        if (rs1Buffer.empty == true)
         {
-            cout << "(RS" << rs1Buffer.rs << ") " << rs1Buffer.r2 << " - " << rs1Buffer.r3 << endl;
+            cout << "empty" << endl;
         }
         else
         {
-            cout << "(RS" << rs1Buffer.rs << ") " << rs1Buffer.r2 << " + " << rs1Buffer.r3 << endl;
+            if (rs1Buffer.operation == 3)
+            {
+                cout << "(RS" << rs1Buffer.rs << ") " << rs1Buffer.r2 << " - " << rs1Buffer.r3 << endl;
+            }
+            else
+            {
+                cout << "(RS" << rs1Buffer.rs << ") " << rs1Buffer.r2 << " + " << rs1Buffer.r3 << endl;
+            }
         }
-    }
-    
 
-/***************************************************************************************/
-    cout << "    -------------------" << endl;
-    for (size_t i = 0; i < 2; i++)
-    {
-        cout << "RS" << i + 4 << " |";
-        if (RS2.size() == 0)
+        /***************************************************************************************/
+        cout << "    -------------------" << endl;
+        for (size_t i = 0; i < 2; i++)
         {
-            cout << "     |     |     |" << endl;
-        }
-        else
-        {
-            if (RS2[i].busy == false)
+            cout << "RS" << i + 4 << " |";
+            if (RS2.size() == 0)
             {
                 cout << "     |     |     |" << endl;
             }
             else
             {
-                if (RS2[i].operation == 4)
+                if (RS2[i].busy == false)
                 {
-                    cout << setw(4) << "*";
+                    cout << "     |     |     |" << endl;
                 }
                 else
                 {
-                    cout << setw(4) << "/";
-                }
+                    if (RS2[i].operation == 4)
+                    {
+                        cout << setw(4) << "*";
+                    }
+                    else
+                    {
+                        cout << setw(4) << "/";
+                    }
 
-                cout << " |";
+                    cout << " |";
 
-                if (RS2[i].rs2 == true)
-                {
-                    cout << " RS" << RS2[i].r2;
-                }
-                else
-                {
-                    cout << setw(4) << RS2[i].r2;
-                }
+                    if (RS2[i].rs2 == true)
+                    {
+                        cout << " RS" << RS2[i].r2;
+                    }
+                    else
+                    {
+                        cout << setw(4) << RS2[i].r2;
+                    }
 
-                cout << " |";
+                    cout << " |";
 
-                if (RS2[i].rs3 == true)
-                {
-                    cout << " RS" << RS2[i].r3;
-                }
-                else
-                {
-                    cout << setw(4) << RS2[i].r3;
-                }
+                    if (RS2[i].rs3 == true)
+                    {
+                        cout << " RS" << RS2[i].r3;
+                    }
+                    else
+                    {
+                        cout << setw(4) << RS2[i].r3;
+                    }
 
-                cout << " |" << endl;
+                    cout << " |" << endl;
+                }
             }
         }
-    }
-    cout << "    -------------------" << endl;
-    cout << "BUFFER: ";
-    if (rs2Buffer.empty == true)
-    {
-        cout << "empty" << endl;
-    }
-    else
-    {
-        if (rs2Buffer.operation == 4)
+        cout << "    -------------------" << endl;
+        cout << "BUFFER: ";
+        if (rs2Buffer.empty == true)
         {
-            cout << "(RS" << rs2Buffer.rs << ") " << rs2Buffer.r2 << " * " << rs2Buffer.r3 << endl;
+            cout << "empty" << endl;
         }
         else
         {
-            cout << "(RS" << rs2Buffer.rs << ") " << rs2Buffer.r2 << " / " << rs2Buffer.r3 << endl;
+            if (rs2Buffer.operation == 4)
+            {
+                cout << "(RS" << rs2Buffer.rs << ") " << rs2Buffer.r2 << " * " << rs2Buffer.r3 << endl;
+            }
+            else
+            {
+                cout << "(RS" << rs2Buffer.rs << ") " << rs2Buffer.r2 << " / " << rs2Buffer.r3 << endl;
+            }
         }
+
+        needToPrint = false;
     }
 
     CYCLE++;
