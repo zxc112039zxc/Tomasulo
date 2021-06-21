@@ -99,6 +99,15 @@ int main()
         inputSS.clear();
         inputStr.clear();
     }
+
+    while (doneInst != 0) //stop until all instructions is write back
+    {
+        issue();
+        execute();
+        writeBack();
+        print();
+    }
+}
 ```
 ---
   Issue: 放進相對應的RS並且更新RAT
