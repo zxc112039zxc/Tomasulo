@@ -111,6 +111,7 @@ int main()
 ```
 ---
   Issue: 放進相對應的RS並且更新RAT
+
 ```C++
 void issue()
 {
@@ -220,6 +221,7 @@ void issue()
 ```
 ---
   Execute: 判斷Buffer狀態，從RS中選出已ready且可execute的instruction，放入Buffer準備執行
+
 ```C++
 void execute()
 {
@@ -273,6 +275,7 @@ void execute()
 ```
 ---
   Write Back: 確認是否執行完成，若完成需write back回兩個RS中需要此result的instruction，根據RAT更新RF，然後release RS與RAT
+
 ```C++
 void writeBack()
 {
@@ -417,6 +420,7 @@ void writeBack()
 ```
 ---
   print: 印出當前cycle、RF、RAT、RS、Buffer，當前cycle++
+
 ```C++
 void print()
 {
