@@ -22,6 +22,14 @@
 
 ## 程式內容
   讀入ADD、MUL、DIV須執行的cycle數與input.txt裡的instructions存入queue
+  
+## Input Sample
+      2
+      10
+      40
+      
+## Output Sample
+      
 
 ```c++
 int main()
