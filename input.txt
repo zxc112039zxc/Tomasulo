@@ -1,0 +1,3 @@
+ADDI F1, F2, 1
+DIV F1, F2, F3
+SUB F1, F3, F4
