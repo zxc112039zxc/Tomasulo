@@ -47,8 +47,8 @@ bool needToPrint = false;
 queue<Instruction> Instructions;
 vector<RS> RS1(3, RS());
 vector<RS> RS2(2, RS());
-Buffer rs1Buffer = {0, 0, 0, 0.0, 0.0, true, 0};
-Buffer rs2Buffer = {0, 0, 0, 0.0, 0.0, true, 0};
+Buffer rs1Buffer = {0, 0, 0, 0, 0, true, 0};
+Buffer rs2Buffer = {0, 0, 0, 0, 0, true, 0};
 
 void issue()
 {
